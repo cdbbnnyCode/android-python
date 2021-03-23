@@ -1,2 +1,8 @@
 __pycache__/
+build/
+out/
+install/
 
+python*.*
+*.zip
+*.tar.gz
