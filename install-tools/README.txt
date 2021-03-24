@@ -1,6 +1,7 @@
 Android-Python for the REV Control Hub
 Copyright (C) 2021 Aidan Yaklin
-This project is licensed under the MIT license. See <url> for more details.
+This project is licensed under the MIT license. See
+https://github.com/cdbbnnyCode/android-python/blob/master/LICENSE.txt for more details.
 
 HOW TO USE
 * Connect your REV hub to your computer with ADB (Wifi or USB should work, as long

@@ -77,6 +77,7 @@ def copy(src, dest):
     shutil.copy(src, dest)
 
 def main():
+    start_time = time.perf_counter()
     print("Building Python for Android 24 64-bit ARM (aarch64-linux-android)")
     print("Checking/installing dependencies")
 
@@ -101,9 +102,9 @@ def main():
         print("'python' is already a file or directory. Please delete or move it.")
         sys.exit(1)
     elif res == 2:
-        print("'python' Git clone found")
+        print("'python' submodule found")
     else:
-        rval = run('git', 'clone', '-n', 'https://github.com/python/cpython')[0]
+        rval = run('git', 'submodule', 'update')[0]
         if rval != 0:
             print("Clone failed!")
             sys.exit(2)
@@ -176,6 +177,9 @@ def main():
     print("Building install archive")
     if trymkdir('install') != 0:
         sys.exit(2)
+    if os.path.exists('install'):
+        for fname in os.listdir('install'):
+            os.remove('install/' + fname)
 
     copy('out/bin/' + python_executable, 'install/' + python_executable)
     install_archive = 'install/' + python_executable + '.tar.gz'
@@ -192,16 +196,21 @@ def main():
         'build-date': time.strftime('%Y-%m-%d %H:%M', build_time)
     }
 
-    with open('install/install.txt', 'w') as f:
+    with open('install/install-info.txt', 'w') as f:
         json.dump(install_info, f)
 
     # copy install scripts
     copy('install-tools/install.py', 'install/install.py')
-    copy('install-tools/install.sh', 'install/install.sh')
+    copy('install-tools/install-setup.sh', 'install/install-setup.sh')
     copy('install-tools/README.txt', 'install/README.txt')
+    copy('LICENSE', 'install/LICENSE.txt')
 
-    output_name = 'android-python-%s-%s' % (time.strftime('%Y%m%d_%H%M', build_time))
+    print()
+    print("Creating zip archive...")
+    output_name = 'android-python-%s-%s' % (py_version, time.strftime('%Y%m%d_%H%M', build_time))
     shutil.make_archive(output_name, 'zip', 'install')
+    print("Done! (%.3f s)" % (time.perf_counter() - start_time))
+    print()
 
 if __name__ == '__main__':
     main()

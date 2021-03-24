@@ -73,17 +73,17 @@ def main():
         sys.exit(1)
 
     print("Uploading install script...")
-    r, stdout = run('adb', 'push', 'install.sh', '/data/local/tmp')
+    r, stdout = run('adb', 'push', 'install-setup.sh', '/data/local/tmp')
     if r != 0:
         print("Upload failed")
         sys.exit(1)
 
     print("Running install script...")
-    r, stdout = run('adb', 'shell', 'chmod', '755', '/data/local/tmp/install.sh')
+    r, stdout = run('adb', 'shell', 'chmod', '755', '/data/local/tmp/install-setup.sh')
     if r != 0:
         print("chmod failed")
         sys.exit(1)
-    r, stdout = run('adb', 'shell', '/data/local/tmp/install.sh', python[len('python'):])
+    r, stdout = run('adb', 'shell', '/data/local/tmp/install-setup.sh', python[len('python'):])
 
     if r != 0:
         print("Installation failed!")
