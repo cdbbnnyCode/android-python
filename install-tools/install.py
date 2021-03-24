@@ -2,12 +2,17 @@ import os
 import sys
 import subprocess
 import json
+import time
 
-def run(*command, cwd=None):
+def run(*command, cwd=None, no_pipe=False):
     print(command)
     try:
-        result = subprocess.run(command, cwd=cwd, stdout=subprocess.PIPE)
-        return result.returncode, result.stdout.decode('utf-8').strip()
+        if no_pipe:
+            result = subprocess.run(command, cwd=cwd)
+            return result.returncode
+        else:
+            result = subprocess.run(command, cwd=cwd, stdout=subprocess.PIPE)
+            return result.returncode, result.stdout.decode('utf-8').strip()
     except OSError:
         return 127, []
 
@@ -22,12 +27,12 @@ def main():
         print("USB or WiFi.")
         sys.exit(0)
 
-    if not os.path.exists('install.txt'):
+    if not os.path.exists('install-info.txt'):
         print("Could not find 'install.txt'. Did you mean to run build.py instead?")
         print("This file should only be used inside an install archive directory.")
         sys.exit(1)
 
-    with open('install.txt', 'r') as f:
+    with open('install-info.txt', 'r') as f:
         install_info = json.load(f)
 
     python = install_info['python']
@@ -54,10 +59,14 @@ def main():
         print("Root failed")
         sys.exit(1)
 
+    time.sleep(0.5)
+
     r, stdout = run('adb', 'remount')
     if r != 0:
         print("Remount failed")
         sys.exit(1)
+
+    time.sleep(0.5)
 
     print("Uploading python...")
     version_maj = version.split('.')[0]
@@ -83,10 +92,13 @@ def main():
     if r != 0:
         print("chmod failed")
         sys.exit(1)
-    r, stdout = run('adb', 'shell', '/data/local/tmp/install-setup.sh', python[len('python'):])
+    r = run('adb', 'shell', '/data/local/tmp/install-setup.sh', python[len('python'):], no_pipe=True)
 
     if r != 0:
         print("Installation failed!")
         print("There are still temporary files in /data/local/tmp. Make sure to")
         print("delete them (in the Android Studio Device File Explorer).")
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()

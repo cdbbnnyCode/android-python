@@ -14,14 +14,14 @@ cd /data/local/tmp
 # Otherwise, this file would conflict with the directory created when we extract
 # the libraries
 echo "Installing executable"
-mv ${py_prefix} /system/bin
+mv -f -v ${py_prefix} /system/bin/${py_prefix}
 # create symlinks
 maj_version=$(echo ${py_prefix} | sed -r 's/(python[0-9]+)\..*/\1/')
-ln -s /system/bin/${py_prefix} /system/bin/${maj_version} # pythonX -> pythonX.Y
-ln -s /system/bin/${py_prefix} /system/bin/python         # python  -> pythonX.Y
+ln -sf /system/bin/${py_prefix} /system/bin/${maj_version} # pythonX -> pythonX.Y
+ln -sf /system/bin/${py_prefix} /system/bin/python         # python  -> pythonX.Y
 
 echo "Extracting archive"
-tar -xzf ${py_prefix}.tar.gz # Should create a directory ${py_prefix}/
+gzip -c -d ${py_prefix}.tar.gz | tar -x # Should create a directory ${py_prefix}/
 if [ $? != 0 ]; then
   echo "Failed to extract archive"
   exit 1
